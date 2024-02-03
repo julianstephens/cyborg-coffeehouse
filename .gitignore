@@ -133,3 +133,6 @@ Thumbs.db
 tmp/
 # Files
 *.out
+
+.flaskenv*
+!.env.project
