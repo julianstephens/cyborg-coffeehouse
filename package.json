@@ -10,11 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "peerjs": "^1.5.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@tsconfig/node18": "^18.2.2",
+    "@tsconfig/vite-react": "^3.0.0",
     "@types/eslint": "^8.56.2",
     "@types/node": "^20.11.16",
     "@types/prettier": "^3.0.0",
@@ -25,6 +26,7 @@
     "@vitejs/plugin-react-swc": "^3.5.0",
     "eslint": "^8.56.0",
     "eslint-config-alloy": "^5.1.2",
+    "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
     "prettier": "^3.2.5",

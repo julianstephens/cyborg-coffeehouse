@@ -1,35 +1,83 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import "./App.css";
+import { peer } from "./peer";
+import { render } from "./video-helpers";
 
 function App() {
-  const [count, setCount] = useState(0)
+    const [callerId, setCallerId] = useState("");
+    const [myId, setMyId] = useState("");
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    peer.on("open", (id) => {
+        setMyId(id);
+    });
+
+    peer.on("error", (err) => {
+        console.error(err.type);
+    });
+
+    peer.on("connection", (conn) => {
+        conn.on("data", (data) => {
+            console.log(`got data: ${data}`);
+        });
+
+        conn.on("open", () => {
+            conn.send("hi!");
+        });
+    });
+
+    peer.on("call", async (call) => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: true,
+                audio: true,
+            });
+            call.answer(stream);
+            call.on("stream", render);
+        } catch (err) {
+            console.error("failed to get local stream", err);
+        }
+    });
+
+    const connectToPeer = async (event: React.FormEvent) => {
+        event.preventDefault();
+        console.log(`connecting to ${callerId}...`);
+        const conn = peer.connect(callerId);
+        conn.on("data", (data) => {
+            console.log(`got data: ${data}`);
+        });
+
+        conn.on("open", () => {
+            conn.send("hello!");
+        });
+
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: true,
+                audio: true,
+            });
+            const call = peer.call(callerId, stream);
+            call.on("stream", render);
+        } catch (err) {
+            console.error(`failed to get local stream`, err);
+        }
+    };
+
+    return (
+        <>
+            <video id="remoteVideo" autoPlay />
+            <hr />
+            <form onSubmit={connectToPeer}>
+                <input
+                    type="text"
+                    onChange={(e) => setCallerId(e.target.value)}
+                    required
+                />
+                <button type="submit">Connect</button>
+            </form>
+            <hr />
+            <h3>My Peer ID: {myId}</h3>
+        </>
+    );
 }
 
-export default App
+export default App;
