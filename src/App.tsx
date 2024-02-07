@@ -1,43 +1,56 @@
 import { Tooltips } from "@/components/Tooltips";
+import { useControlState } from "@/contexts/control-state";
 import { useState } from "react";
 import { ControlBar } from "./components/ControlBar";
+import { Participant } from "./components/Participant";
+import { Self } from "./components/Self";
 import { peer } from "./peer";
-import { render } from "./video-helpers";
 
 function App() {
     // const [callerId, setCallerId] = useState("");
-    const [myId, setMyId] = useState("");
+    const [myStream, setMyStream] = useState<MediaProvider | undefined>(
+        undefined,
+    );
+    const { updateId } = useControlState();
 
     peer.on("open", (id) => {
-        setMyId(id);
+        updateId(id);
+
+        navigator.mediaDevices
+            .getUserMedia({ audio: true, video: true })
+            .then((stream) => {
+                window.localStream = stream;
+                setMyStream(stream);
+            })
+            .catch(console.error.bind(console));
     });
 
-    peer.on("error", (err) => {
-        console.error(err.type);
-    });
+    // peer.on("error", (err) => {
+    //     console.error(err.type);
+    // });
 
-    peer.on("connection", (conn) => {
-        conn.on("data", (data) => {
-            console.log(`got data: ${data}`);
-        });
+    // peer.on("connection", (conn) => {
+    //     conn.on("data", (data) => {
+    //         console.log(`got data: ${data}`);
+    //     });
 
-        conn.on("open", () => {
-            conn.send("hi!");
-        });
-    });
+    //     conn.on("open", () => {
+    //         conn.send("hi!");
+    //     });
+    // });
 
-    peer.on("call", async (call) => {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: true,
-                audio: true,
-            });
-            call.answer(stream);
-            call.on("stream", render);
-        } catch (err) {
-            console.error("failed to get local stream", err);
-        }
-    });
+    // peer.on("call", async (call) => {
+    //     try {
+    //         const stream = await navigator.mediaDevices.getUserMedia({
+    //             video: true,
+    //             audio: true,
+    //         });
+    //         call.answer(stream);
+    //         call.on("stream", render);
+    //     } catch (err) {
+    //         console.error("failed to get local stream", err);
+    //     }
+    // });
 
     // const connectToPeer = async (event: React.FormEvent) => {
     //     event.preventDefault();
@@ -66,14 +79,11 @@ function App() {
     return (
         <>
             <Tooltips />
-            <div className="flex flex-col full justify-end">
-                <ControlBar
-                    id={myId}
-                    isMuted
-                    isConnected
-                    didScreenShare={false}
-                    cameraOn={true}
-                />
+            <div className="flex flex-col full justify-around">
+                <h1>Cyborg Coffeehouse</h1>
+                <Self stream={myStream} />
+                <Participant />
+                <ControlBar />
             </div>
             {/* <video id="remoteVideo" autoPlay /> */}
             {/* <hr /> */}

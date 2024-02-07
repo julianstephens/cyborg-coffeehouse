@@ -1,3 +1,5 @@
+import type { ControlState} from "@/contexts/control-state";
+import { useControlState } from "@/contexts/control-state";
 import { Tooltips as TS } from "@/utils";
 import { useEffect, useState } from "react";
 import {
@@ -21,15 +23,13 @@ export type ControlBarProps = {
     isConnected: boolean;
 };
 
-export const ControlBar = ({
-    id,
-    isMuted,
-    isConnected,
-    didScreenShare,
-    cameraOn,
-}: ControlBarProps) => {
+export const ControlBar = () => {
+    const { id, state, updateState } = useControlState();
     const [didCopy, setDidCopy] = useState(false);
     const [, copy] = useCopyToClipboard();
+
+    const disabledStyles = () =>
+        `${state.isConnected ? "visible cursor-pointer" : "invisible disabled cursor-default"}`;
 
     const handleCopy = () => {
         copy(id)
@@ -38,6 +38,10 @@ export const ControlBar = ({
                 console.log("copied!");
             })
             .catch(console.error.bind(console));
+    };
+
+    const toggle = (key: keyof ControlState) => {
+        updateState({ [key]: !state[key] });
     };
 
     useEffect(() => {
@@ -71,46 +75,50 @@ export const ControlBar = ({
                     <Tooltip id="copy-id" />
                 </div>
             )}
-            {isConnected && (
-                <>
-                    <div className="flex gap-8">
-                        <button
-                            className={`btn ${isMuted && "bg-red-500"}`}
-                            data-tooltip-id={TS.MUTE}
-                            data-tooltip-content={`${isMuted ? "Mute" : "Unmute"} microphone`}
-                        >
-                            {isMuted ? (
-                                <BsMicMute size={28} />
-                            ) : (
-                                <BsMic size={28} />
-                            )}
-                        </button>
-                        <button
-                            className={`btn ${cameraOn && "bg-red-500"}`}
-                            data-tooltip-id={TS.CAMERA}
-                            data-tooltip-content={`Turn ${cameraOn ? "off" : "on"}`}
-                        >
-                            {cameraOn ? (
-                                <BsCameraVideoOff size={28} />
-                            ) : (
-                                <BsCameraVideo size={28} />
-                            )}
-                        </button>
-                        <button
-                            className={`btn ${didScreenShare && "bg-red-500"}`}
-                            data-tooltip-id={TS.SCREENSHARE}
-                            data-tooltip-content={`${didScreenShare ? "Stop" : "Start"} screenshare`}
-                        >
-                            {didScreenShare ? (
-                                <LuScreenShareOff size={28} />
-                            ) : (
-                                <LuScreenShare size={28} />
-                            )}
-                        </button>
-                    </div>
-                    <button className="btn bg-red-500">Leave Call</button>
-                </>
-            )}
+            <div className="flex gap-8">
+                <button
+                    onClick={() => toggle("isMuted")}
+                    className={`btn ${!state.isMuted && "bg-red-500"}`}
+                    data-tooltip-id={TS.MUTE}
+                    data-tooltip-content={`${state.isMuted ? "Unmute" : "Mute"} microphone`}
+                >
+                    {state.isMuted ? (
+                        <BsMicMute size={28} />
+                    ) : (
+                        <BsMic size={28} />
+                    )}
+                </button>
+                <button
+                    onClick={() => toggle("cameraOn")}
+                    className={`btn ${state.cameraOn && "bg-red-500"}`}
+                    data-tooltip-id={TS.CAMERA}
+                    data-tooltip-content={`Turn ${state.cameraOn ? "off" : "on"}`}
+                >
+                    {state.cameraOn ? (
+                        <BsCameraVideo size={28} />
+                    ) : (
+                        <BsCameraVideoOff size={28} />
+                    )}
+                </button>
+                <button
+                    onClick={() => toggle("didScreenShare")}
+                    className={`btn ${state.didScreenShare && "bg-red-500"} ${disabledStyles()}`}
+                    data-tooltip-id={TS.SCREENSHARE}
+                    data-tooltip-content={`${state.didScreenShare ? "Stop" : "Start"} screenshare`}
+                >
+                    {state.didScreenShare ? (
+                        <LuScreenShareOff size={28} />
+                    ) : (
+                        <LuScreenShare size={28} />
+                    )}
+                </button>
+            </div>
+            <button
+                className={`btn bg-red-500 ${disabledStyles()}`}
+                onClick={() => toggle("isConnected")}
+            >
+                Leave Call
+            </button>
         </div>
     );
 };

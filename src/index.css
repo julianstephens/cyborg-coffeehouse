@@ -16,7 +16,19 @@
   }
 
   body {
-    @apply p-20 pb-40;
+    @apply px-20 py-10 pb-20;
+  }
+
+  h1 {
+    @apply text-3xl;
+  }
+
+  h2 {
+    @apply text-2xl;
+  }
+
+  h3 {
+    @apply text-xl;
   }
 }
 
