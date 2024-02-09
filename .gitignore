@@ -130,3 +130,8 @@ dist
 .pnp.*
 
 .quicknote
+
+.env*
+.flaskenv*
+!.env.project
+!.env.vault
