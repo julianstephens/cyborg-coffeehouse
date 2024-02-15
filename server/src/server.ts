@@ -1,5 +1,4 @@
-import { consumerMgr, peerMgr, producerMgr, transportMgr } from "@/manager";
-import type { Peer, SocketData } from "@/types";
+import config from "@/config";
 import express, {
   type NextFunction,
   type Request,
@@ -8,9 +7,6 @@ import express, {
 import fs from "fs";
 import { StatusCodes } from "http-status-codes";
 import https from "https";
-import { nanoid } from "nanoid";
-import { Server } from "socket.io";
-import config from "./config";
 import { log } from "./logger";
 
 export const createExpressApp = async () => {
@@ -60,49 +56,5 @@ export const createWebServer = async (
       undefined,
       resolve as () => void
     );
-  });
-};
-
-export const createSocketServer = async (httpsServer: https.Server) => {
-  const socketServer = new Server<{}, {}, {}, SocketData>(httpsServer, {
-    serveClient: false,
-    path: "/server",
-  });
-
-  socketServer.use((socket, next) => {
-    const sessionId = socket.handshake.auth["sessionID"];
-    if (sessionId) {
-      socket.data.sessionID = sessionId;
-      return next();
-    }
-
-    socket.data.sessionID = nanoid(20);
-  });
-
-  socketServer.on("connection", (socket) => {
-    const p: Peer = {
-      socket,
-      room: config.roomName,
-      transports: [],
-      producers: [],
-      consumers: [],
-      self: { socketId: socket.data.sessionID, name: "", isAdmin: false },
-    };
-    peerMgr.add(socket.data.sessionID, p);
-
-    log.withMetadata(p.self).info("client connected");
-
-    socket.on("disconnect", () => {
-      log.info(`client disconnected id = ${socket.data.sessionID}`);
-      consumerMgr.remove(socket.data.sessionID);
-      transportMgr.remove(socket.data.sessionID);
-      producerMgr.remove(socket.data.sessionID);
-    });
-
-    socket.on("error", (err) => {
-      log
-        .withError(err)
-        .error("something went wrong with the socket.io server");
-    });
   });
 };

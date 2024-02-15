@@ -1,7 +1,7 @@
 import config from "@/config";
+import type { Primitive } from "@/types";
 import { LogLayer, LogLevel, LoggerType } from "loglayer";
 import pino, { type P } from "pino";
-import type { Primitive } from "./types";
 
 class Log {
   _p: P.BaseLogger;

@@ -18,13 +18,14 @@ export type Config = {
 };
 
 export type MediasoupConfig = {
-  numWorkers?: number;
-  workerSettings?: mediasoup.types.WorkerSettings;
-  routerOptions?: mediasoup.types.RouterOptions;
-  webRtcServerOptions?: mediasoup.types.WebRtcServerOptions;
-  webRtcTransportOptions?: mediasoup.types.WebRtcTransportOptions;
-  plainTransportOptions?: mediasoup.types.PlainTransportOptions;
+  numWorkers: number;
+  workerSettings: mediasoup.types.WorkerSettings;
+  routerOptions: mediasoup.types.RouterOptions;
+  webRtcServerOptions: mediasoup.types.WebRtcServerOptions;
+  webRtcTransportOptions: mediasoup.types.WebRtcTransportOptions;
+  plainTransportOptions: mediasoup.types.PlainTransportOptions;
 };
+
 
 export interface SocketData extends io.Socket {
   sessionID: string;

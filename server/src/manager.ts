@@ -1,4 +1,4 @@
-import type { Consumer, Peer, Producer, Transport } from "@/types";
+import type { Peer } from "@/types";
 
 class Manager<T> {
   #data: Record<string, T>;
@@ -17,6 +17,3 @@ class Manager<T> {
 }
 
 export const peerMgr = new Manager<Peer>();
-export const transportMgr = new Manager<Transport>();
-export const consumerMgr = new Manager<Consumer>();
-export const producerMgr = new Manager<Producer>();
